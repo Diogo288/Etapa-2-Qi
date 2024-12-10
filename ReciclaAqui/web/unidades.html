@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReciclaAqui - Pesquisa de Unidades de Reciclagem</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Sobre</a></li>
+                <li><a href="unidades.html">Pesquisar</a></li>
+                <li><a href="login.html">Fazer login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="pesquisa-unidades">
+            <h1>Pesquisar Unidades de Reciclagem</h1>
+            <form action="resultado.html" method="GET">
+                <label for="tipoUnidade">Tipo de unidade:</label>
+                <select id="tipoUnidade" name="tipoUnidade">
+                    <option value="pev">PEV</option>
+                    <option value="cooperativa">Cooperativa de Reciclagem</option>
+                </select>
+
+                <label for="estado">Estado:</label>
+                <select id="estado" name="estado" onchange="carregarCidades()">
+                    <option value="" disabled selected>Selecione um estado</option>
+                    <option value="RS">Rio Grande do Sul (RS)</option>
+                </select>
+
+                <label for="cidade">Cidade:</label>
+                <select id="cidade" name="cidade">
+                    <option value="" disabled selected>Selecione uma cidade</option>
+                </select>
+
+                <label for="residuosAceitos">Tipos de resíduos aceitos:</label>
+                <div class="checkboxes">
+                    <label><input type="checkbox" name="residuos[]" value="papel"> Papel e papelão</label>
+                    <label><input type="checkbox" name="residuos[]" value="plastico"> Plástico</label>
+                    <label><input type="checkbox" name="residuos[]" value="aluminio"> Alumínio</label>
+                    <label><input type="checkbox" name="residuos[]" value="vidro"> Vidro</label>
+                </div>
+
+                <button type="submit">Pesquisar</button>
+            </form>
+
+            <p>
+                <a href="cadastro_pev.html">É dono de um PEV e deseja tê-lo exibido no site?</a>
+            </p>
+
+            <!-- Mapa com marcador interativo -->
+            <section id="map"></section>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 ReciclaAqui. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        function carregarCidades() {
+            var estado = document.getElementById("estado").value;
+            var cidadeSelect = document.getElementById("cidade");
+            cidadeSelect.innerHTML = '<option value="" disabled selected>Selecione uma cidade</option>';
+
+            if (estado === "RS") {
+                var cidadesRS = ["Porto Alegre", "Caxias do Sul", "Pelotas", "Canoas", "Santa Maria"];
+                cidadesRS.forEach(function(cidade) {
+                    var option = document.createElement("option");
+                    option.value = cidade;
+                    option.text = cidade;
+                    cidadeSelect.appendChild(option);
+                });
+            }
+        }
+
+        window.onload = function() {
+            // Mapa com coordenadas fixas para exemplo (Porto Alegre)
+            var map = L.map('map').setView([-30.0346, -51.2177], 14);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Dados das unidades de reciclagem
+            var unidades = [
+                {
+                    nome: "Ponto de Reciclagem Porto Alegre",
+                    lat: -30.0346,
+                    lng: -51.2177,
+                    descricao: "Papel, Plástico, Alumínio, Vidro",
+                    comentarios: [
+                        "Excelente ponto de reciclagem, muito organizado.",
+                        "Local de fácil acesso, recomendo!"
+                    ]
+                },
+                {
+                    nome: "Cooperativa ReciclaSul",
+                    lat: -30.0348,
+                    lng: -51.2180,
+                    descricao: "Papel e Papelão, Plástico",
+                    comentarios: [
+                        "A cooperativa tem bom atendimento.",
+                        "Precisa melhorar o horário de funcionamento."
+                    ]
+                }
+            ];
+
+            // Adicionando marcadores com informações e comentários
+            unidades.forEach(function(unidade) {
+                var marker = L.marker([unidade.lat, unidade.lng]).addTo(map);
+                
+                // Construindo o conteúdo do pop-up
+                var popupContent = `
+                    <div class="popup-content">
+                        <h3>${unidade.nome}</h3>
+                        <p><strong>Resíduos Aceitos:</strong> ${unidade.descricao}</p>
+                        <h4>Comentários:</h4>
+                        <ul class="comentarios">
+                            ${unidade.comentarios.map(function(comentario) {
+                                return `<li>${comentario}</li>`;
+                            }).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+            });
+        };
+    </script>
+</body>
+</html>
