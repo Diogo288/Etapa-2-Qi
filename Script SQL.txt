@@ -1,0 +1,47 @@
+-- Criação do banco de dados
+CREATE DATABASE recicla_aqui;
+USE recicla_aqui;
+
+-- Tabela para usuários (administradores e outros usuários, se necessário)
+CREATE TABLE usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    tipo ENUM('admin', 'usuario') DEFAULT 'usuario',
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela para unidades de reciclagem
+CREATE TABLE unidades (
+    id_unidade INT AUTO_INCREMENT PRIMARY KEY,
+    cnpj VARCHAR(18) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    endereco VARCHAR(255) NOT NULL,
+    residuos_aceitos VARCHAR(255) NOT NULL,
+    horario_inicio TIME NOT NULL,
+    horario_fim TIME NOT NULL,
+    email_contato VARCHAR(100),
+    imagem_local LONGBLOB,
+    criado_por INT,
+    aprovado ENUM('sim', 'nao', 'pendente') DEFAULT 'pendente',
+    FOREIGN KEY (criado_por) REFERENCES usuarios(id_usuario) ON DELETE SET NULL
+);
+
+-- Tabela para comentários dos usuários nas unidades de reciclagem
+CREATE TABLE comentarios (
+    id_comentario INT AUTO_INCREMENT PRIMARY KEY,
+    id_unidade INT NOT NULL,
+    id_usuario INT NOT NULL,
+    comentario TEXT NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_unidade) REFERENCES unidades(id_unidade) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+);
+
+-- Dados de exemplo
+INSERT INTO usuarios (nome, email, senha, tipo) VALUES 
+('Administrador', 'admin@reciclaaqui.com', 'senha123', 'admin');
+
+INSERT INTO unidades (cnpj, nome, endereco, residuos_aceitos, horario_inicio, horario_fim, email_contato, criado_por, aprovado) VALUES
+('12.345.678/0001-99', 'Ponto de Reciclagem Porto Alegre', 'Av. Exemplo, 123 - Porto Alegre', 'Papel, Plástico', '08:00:00', '18:00:00', 'contato@email.com', 1, 'pendente');
